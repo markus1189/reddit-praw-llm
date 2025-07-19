@@ -104,9 +104,30 @@ def format_as_json(data: Dict[str, Any]) -> str:
     return json.dumps(data, indent=2, ensure_ascii=False)
 
 
+def format_multiple_posts_text(posts_data: List[Dict[str, Any]]) -> str:
+    """Format multiple posts as human-readable text with separators."""
+    output = []
+    
+    for i, data in enumerate(posts_data):
+        if i > 0:
+            # Add separator between posts
+            output.append("\n" + "=" * 80)
+            output.append(f"POST {i + 1} OF {len(posts_data)}")
+            output.append("=" * 80 + "\n")
+        
+        output.append(format_as_text(data))
+    
+    return '\n'.join(output)
+
+
+def format_multiple_posts_json(posts_data: List[Dict[str, Any]]) -> str:
+    """Format multiple posts as JSON array."""
+    return json.dumps(posts_data, indent=2, ensure_ascii=False)
+
+
 def main():
-    parser = argparse.ArgumentParser(description='Fetch top-level comments from a Reddit post')
-    parser.add_argument('post_id', help='Reddit post ID')
+    parser = argparse.ArgumentParser(description='Fetch top-level comments from Reddit post(s)')
+    parser.add_argument('post_ids', nargs='+', help='Reddit post ID(s)')
     parser.add_argument('--format', choices=['text', 'json'], default='text',
                        help='Output format (default: text)')
     
@@ -115,14 +136,35 @@ def main():
     # Initialize Reddit client
     reddit = get_reddit_client()
     
-    # Fetch comments
-    data = fetch_top_level_comments(reddit, args.post_id)
+    # Fetch comments for all posts
+    posts_data = []
+    for i, post_id in enumerate(args.post_ids):
+        if len(args.post_ids) > 1:
+            print(f"Fetching post {i + 1}/{len(args.post_ids)}: {post_id}...", file=sys.stderr)
+        
+        try:
+            data = fetch_top_level_comments(reddit, post_id)
+            posts_data.append(data)
+        except Exception as e:
+            print(f"Error fetching post {post_id}: {str(e)}", file=sys.stderr)
+            # Continue with other posts instead of exiting
+            continue
+    
+    if not posts_data:
+        print("Error: No posts could be fetched successfully.", file=sys.stderr)
+        sys.exit(1)
     
     # Format and output
     if args.format == 'json':
-        print(format_as_json(data))
+        if len(posts_data) == 1:
+            print(format_as_json(posts_data[0]))
+        else:
+            print(format_multiple_posts_json(posts_data))
     else:
-        print(format_as_text(data))
+        if len(posts_data) == 1:
+            print(format_as_text(posts_data[0]))
+        else:
+            print(format_multiple_posts_text(posts_data))
 
 
 if __name__ == '__main__':
