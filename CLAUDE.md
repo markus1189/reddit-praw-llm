@@ -243,6 +243,41 @@ for sub in python javascript golang; do
 done
 ```
 
+## Advanced Analysis Techniques
+
+### Sub-Agent Batching for Large-Scale Analysis
+
+When analyzing large datasets that might exceed context limits, use this sub-agent batching approach:
+
+```bash
+# 1. Discover posts and extract IDs
+python list_top_posts.py SUBREDDIT --time week --limit 100 --format json
+
+# 2. Extract post IDs and batch them
+echo 'POST_ID1 POST_ID2 POST_ID3...' | tr ' ' '\n' | split -l 10 - post_batch_
+
+# 3. Use Task tool with summarizing prompts for each batch
+# Task tool prompt example:
+# "Analyze Reddit posts from r/SUBREDDIT. Read post IDs from post_batch_aa, 
+# use fetch_comments.py to get detailed content, then provide a 2-3 paragraph 
+# summary focusing on: common themes, popular genres, reading situations, 
+# notable book recommendations, and engagement patterns."
+
+# 4. Compile final analysis from batch summaries
+```
+
+**Benefits:**
+- Manages context size effectively for large datasets
+- Enables parallel processing of post batches
+- Provides focused analysis on specific subsets
+- Allows for comprehensive final synthesis
+
+**Use Cases:**
+- Analyzing 50+ posts from active subreddits
+- Conducting deep content analysis requiring detailed comment examination
+- Research projects needing systematic approach to large communities
+- Comparative analysis across multiple time periods or subreddits
+
 ## Notes for Development
 
 - Scripts use PRAW generators for memory efficiency
