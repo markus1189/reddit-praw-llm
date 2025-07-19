@@ -33,7 +33,7 @@ def fetch_top_level_comments(reddit: praw.Reddit, post_id: str) -> Dict[str, Any
     try:
         submission = reddit.submission(id=post_id)
         
-        # Basic post information
+        # Enhanced post information with source references
         post_data = {
             'post_id': post_id,
             'post_title': submission.title,
@@ -41,6 +41,10 @@ def fetch_top_level_comments(reddit: praw.Reddit, post_id: str) -> Dict[str, Any
             'post_type': 'text' if submission.is_self else 'link',
             'post_score': submission.score,
             'post_url': submission.url,
+            'post_author': str(submission.author) if submission.author else '[deleted]',
+            'post_permalink': f"https://reddit.com{submission.permalink}",
+            'post_subreddit': str(submission.subreddit),
+            'post_created_utc': submission.created_utc,
             'total_comments': submission.num_comments,
             'top_level_comments': []
         }
@@ -70,10 +74,11 @@ def format_as_text(data: Dict[str, Any]) -> str:
     """Format comment data as human-readable text suitable for LLM consumption."""
     output = []
     
-    # Post header
+    # Enhanced post header with source reference
     output.append(f"Post: {data['post_title']}")
-    output.append(f"Type: {data['post_type']} | Score: {data['post_score']} | Total Comments: {data['total_comments']}")
-    output.append(f"URL: {data['post_url']}")
+    output.append(f"Source: [{data['post_title']}]({data['post_permalink']}) by u/{data['post_author']} ({data['post_score']} upvotes)")
+    output.append(f"Subreddit: r/{data['post_subreddit']} | Type: {data['post_type']} | Total Comments: {data['total_comments']}")
+    output.append(f"Original URL: {data['post_url']}")
     
     # Post content (if it's a text post)
     if data['post_content']:

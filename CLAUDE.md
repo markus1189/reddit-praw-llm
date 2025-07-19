@@ -172,6 +172,97 @@ python fetch_comments.py ID1 ID2 ID3  # analyze multiple posts
 Reddit URLs: `https://reddit.com/r/SUBREDDIT/comments/POST_ID/title/`
 Post ID is the part between `/comments/` and the next `/`
 
+## Reddit Analysis Protocol
+
+When analyzing Reddit content for any topic:
+
+### Source Reference Requirements
+- **Always include clickable source links**: `[Post Title](permalink)` format
+- **Credit authors**: Use `u/username` format  
+- **Show community validation**: Include `(X upvotes)` scores
+- **Use direct quotes**: With proper attribution when impactful
+- **Organize insights**: By relevance to user's topic
+- **Enable verification**: Link to original discussions for follow-up
+
+### Standard Reference Format
+```markdown
+**Source**: [Post Title](https://reddit.com/r/SUBREDDIT/comments/POST_ID) by u/author (score upvotes)
+```
+
+### Analysis Template for Any Topic
+```markdown
+Analyze these Reddit posts about [TOPIC] from r/[SUBREDDIT]. For each key insight:
+
+1. **Include source reference**: [Post Title](permalink) by u/username (Score upvotes)
+2. **Extract key insights** relevant to [TOPIC]
+3. **Use direct quotes** with attribution when impactful
+4. **Organize by themes** or importance
+5. **Note community consensus** via upvote patterns
+
+Format each insight as:
+### Insight Title (Score upvotes)
+**Source**: [Post Title](link) by u/author
+**Key Point**: Summary...
+> "Relevant quote from post or comments"
+> — u/author
+
+Make sources clickable so readers can verify claims and engage with original authors.
+```
+
+## Topic-Agnostic Discovery Patterns
+
+### Universal Search Patterns
+```bash
+# Find tutorials/guides in any field
+python list_top_posts.py SUBREDDIT --filter-title "(tutorial|guide|how.*to)" 
+
+# Find best practices
+python list_top_posts.py SUBREDDIT --filter-title "(best.*practice|tip|trick|hack)"
+
+# Find tools/resources  
+python list_top_posts.py SUBREDDIT --filter-title "(tool|resource|library|framework)"
+
+# Find problem-solving discussions
+python list_top_posts.py SUBREDDIT --filter-title "(problem|issue|solution|fix)"
+
+# Find experience sharing
+python list_top_posts.py SUBREDDIT --filter-title "(experience|lesson|mistake|learn)"
+```
+
+### Flexible Analysis Workflow
+```bash
+# Step 1: Broad discovery
+python list_top_posts.py SUBREDDIT --time month --limit 50
+
+# Step 2: Focused filtering  
+python list_top_posts.py SUBREDDIT --filter-title "RELEVANT_TERMS" --time week
+
+# Step 3: Deep analysis with source references
+python fetch_comments.py INTERESTING_POST_IDS
+
+# Step 4: Synthesize with proper attribution
+```
+
+### Example Use Cases
+
+**Learning a Programming Language:**
+```bash
+python list_top_posts.py learnpython --filter-title "(beginner|tutorial|resource)" --time month
+# → Analyze for learning paths, common mistakes, best resources
+```
+
+**Market Research:**
+```bash
+python list_top_posts.py startups --filter-title "(market|customer|product.*fit)" --time year  
+# → Analyze for market insights, validation strategies, customer research
+```
+
+**Tool Evaluation:**
+```bash
+python list_top_posts.py MachineLearning --filter-title "(tool|library|framework)" --time month
+# → Analyze for tool comparisons, use cases, community preferences
+```
+
 ## Best Practices for AI Assistants
 
 ### Guiding Users Effectively
@@ -188,13 +279,14 @@ Post ID is the part between `/comments/` and the next `/`
 
 3. **Output Format Selection**
    - Stream: Real-time exploration and discovery
-   - Text: Human review and summary reports  
+   - Text: Human review and summary reports with source references
    - JSON: Data analysis and programmatic processing
 
 4. **Workflow Integration**
    - Show how to chain the two scripts together
    - Demonstrate extracting post IDs from list output
    - Explain when to use each tool
+   - Always emphasize source attribution in final analysis
 
 ### Common User Scenarios
 
