@@ -4,12 +4,14 @@ This document provides guidance for AI assistants working with this Reddit data 
 
 ## Project Overview
 
-This toolkit contains two complementary Python scripts for Reddit data extraction:
+This toolkit contains three complementary Python scripts for Reddit data extraction:
 
-1. **`fetch_comments.py`** - Extracts detailed post content and top-level comments from specific Reddit posts
+1. **`search_subreddits.py`** - Discovers and searches subreddits by topic, popularity, or recommendations
 2. **`list_top_posts.py`** - Discovers and filters top posts from subreddits with advanced pagination
+3. **`fetch_comments.py`** - Extracts detailed post content and top-level comments from specific Reddit posts
 
 **Key Capabilities:**
+- Discover subreddits by topic, popularity, or get personalized recommendations
 - Extract up to 1000 posts from any subreddit with time filtering
 - Real-time streaming output with progress tracking  
 - Regex-based title filtering for targeted data collection
@@ -37,7 +39,10 @@ direnv allow  # or `nix develop`
 ### 1. Research & Discovery
 **Goal:** Find interesting posts on a topic
 ```bash
-# Discover Python tutorials from the past month
+# Step 1: Discover relevant subreddits
+python search_subreddits.py --search "python tutorial" --limit 10
+
+# Step 2: Browse top posts in discovered subreddits
 python list_top_posts.py learnpython --filter-title "tutorial" --time month
 
 # Find AI/ML discussions
@@ -47,11 +52,14 @@ python list_top_posts.py MachineLearning --filter-title "(AI|ML|machine.*learnin
 ### 2. Content Analysis
 **Goal:** Deep dive into specific posts
 ```bash
-# Step 1: Find posts (note the post IDs in brackets)
+# Step 1: Find relevant subreddits
+python search_subreddits.py --search "programming" --min-subscribers 10000
+
+# Step 2: Find posts (note the post IDs in brackets)
 python list_top_posts.py programming --filter-title "python"
 
-# Step 2: Get detailed content for interesting posts
-python fetch_comments.py abc123def  # Use post ID from step 1
+# Step 3: Get detailed content for interesting posts
+python fetch_comments.py abc123def  # Use post ID from step 2
 ```
 
 ### 3. Data Collection
@@ -72,6 +80,38 @@ python list_top_posts.py python --time day --filter-title "(release|update|new)"
 ```
 
 ## Command Patterns & Examples
+
+### search_subreddits.py
+
+**Basic Patterns:**
+```bash
+# Search by topic/keyword
+python search_subreddits.py --search "machine learning"
+
+# Get popular subreddits
+python search_subreddits.py --popular --limit 50
+
+# Find newly created subreddits
+python search_subreddits.py --new --limit 25
+
+# Get recommendations based on existing subreddits
+python search_subreddits.py --recommend "python,datascience,MachineLearning"
+```
+
+**Advanced Filtering:**
+```bash
+# Filter by subscriber count
+python search_subreddits.py --search "programming" --min-subscribers 10000 --max-subscribers 100000
+
+# Exclude NSFW content (shows all by default)
+python search_subreddits.py --popular --exclude-nsfw
+
+# Filter by activity level
+python search_subreddits.py --search "gamedev" --min-activity 50
+
+# Sort results
+python search_subreddits.py --search "python" --sort subscribers-desc
+```
 
 ### list_top_posts.py
 
@@ -342,20 +382,23 @@ done
 When analyzing large datasets that might exceed context limits, use this sub-agent batching approach:
 
 ```bash
-# 1. Discover posts and extract IDs
+# 1. Discover relevant subreddits
+python search_subreddits.py --search "topic" --limit 20
+
+# 2. Discover posts and extract IDs
 python list_top_posts.py SUBREDDIT --time week --limit 100 --format json
 
-# 2. Extract post IDs and batch them
+# 3. Extract post IDs and batch them
 echo 'POST_ID1 POST_ID2 POST_ID3...' | tr ' ' '\n' | split -l 10 - post_batch_
 
-# 3. Use Task tool with summarizing prompts for each batch
+# 4. Use Task tool with summarizing prompts for each batch
 # Task tool prompt example:
 # "Analyze Reddit posts from r/SUBREDDIT. Read post IDs from post_batch_aa, 
 # use fetch_comments.py to get detailed content, then provide a 2-3 paragraph 
 # summary focusing on: common themes, popular genres, reading situations, 
 # notable book recommendations, and engagement patterns."
 
-# 4. Compile final analysis from batch summaries
+# 5. Compile final analysis from batch summaries
 ```
 
 **Benefits:**
@@ -365,6 +408,7 @@ echo 'POST_ID1 POST_ID2 POST_ID3...' | tr ' ' '\n' | split -l 10 - post_batch_
 - Allows for comprehensive final synthesis
 
 **Use Cases:**
+- Discovering communities around emerging topics
 - Analyzing 50+ posts from active subreddits
 - Conducting deep content analysis requiring detailed comment examination
 - Research projects needing systematic approach to large communities
@@ -375,8 +419,8 @@ echo 'POST_ID1 POST_ID2 POST_ID3...' | tr ' ' '\n' | split -l 10 - post_batch_
 - Scripts use PRAW generators for memory efficiency
 - Error handling includes graceful degradation
 - Progress tracking uses stderr (preserves stdout for data)
-- Both scripts share authentication pattern
+- All scripts share authentication pattern
 - Regex compilation happens once per run
 - CTRL+C handling preserves partial results
 
-This toolkit is designed for researchers, content creators, and analysts who need structured Reddit data extraction with filtering capabilities.
+This toolkit is designed for researchers, content creators, and analysts who need structured Reddit data extraction with filtering capabilities. The three-script pipeline enables complete workflow from topic discovery to detailed content analysis.

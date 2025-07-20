@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python list_top_posts.py:*)",
+      "Bash(python fetch_comments.py:*)",
+      "Bash(mktemp:*)",
+      "Bash(python:*)",
+      "WebFetch(domain:praw.readthedocs.io)"
+    ],
+    "deny": []
+  }
+}
