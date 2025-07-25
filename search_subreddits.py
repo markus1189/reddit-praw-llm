@@ -178,7 +178,9 @@ def format_output(subreddits_data: List[Dict[str, Any]],
             
             # Format subscriber count
             subs = sub['subscribers']
-            if subs >= 1000000:
+            if subs is None:
+                sub_str = "N/A"
+            elif subs >= 1000000:
                 sub_str = f"{subs/1000000:.1f}M"
             elif subs >= 1000:
                 sub_str = f"{subs/1000:.1f}k"
