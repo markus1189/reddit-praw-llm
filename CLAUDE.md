@@ -328,6 +328,12 @@ python list_top_posts.py MachineLearning --filter-title "(tool|library|framework
    - Explain when to use each tool
    - Always emphasize source attribution in final analysis
 
+5. **Subagent Integration** (Recommended)
+   - **Prefer subagents** over manual script chaining for complex research
+   - **Start with orchestrator** for comprehensive research initiatives
+   - **Use individual agents** for specific sub-tasks (discovery, curation, synthesis)
+   - **Maintain Analysis Protocol** standards through automated attribution
+
 ### Common User Scenarios
 
 **"I want to analyze discussions about X"**
@@ -377,9 +383,80 @@ done
 
 ## Advanced Analysis Techniques
 
-### Sub-Agent Batching for Large-Scale Analysis
+### Reddit Research Subagents (Recommended Approach)
 
-When analyzing large datasets that might exceed context limits, use this sub-agent batching approach:
+This project includes specialized Claude Code subagents designed for efficient Reddit research workflows. These agents are located in `.claude/agents/` and provide context-efficient, orchestrated research capabilities.
+
+#### Available Subagents:
+
+**1. reddit-discovery-specialist**
+- **Purpose**: Find relevant subreddits and optimize search strategies  
+- **Use When**: Starting research on new topics
+- **Capabilities**: Topic analysis, subreddit discovery, parameter optimization
+
+**2. reddit-content-curator**  
+- **Purpose**: Filter and prioritize posts based on research goals
+- **Use When**: Dealing with large post volumes
+- **Capabilities**: Regex pattern crafting, quality assessment, batch processing
+
+**3. reddit-analysis-synthesizer**
+- **Purpose**: Process large volumes of Reddit content with proper source attribution
+- **Use When**: Analyzing 10+ posts or complex discussions  
+- **Capabilities**: Theme extraction, source attribution, content organization
+
+**4. reddit-research-orchestrator**
+- **Purpose**: Coordinate complex Reddit research workflows
+- **Use When**: Comprehensive research initiatives
+- **Capabilities**: Workflow planning, agent coordination, quality control
+
+#### Subagent Workflow Patterns:
+
+**Simple Research** (Single topic):
+```bash
+# Deploy orchestrator with research topic
+# Example: "Research ultrarunning nutrition tips from Reddit"
+# Orchestrator automatically coordinates other agents
+```
+
+**Exploratory Research** (New topic):
+```
+1. Discovery Agent → Find relevant subreddits
+2. Curator Agent → Filter high-value posts per subreddit  
+3. Synthesizer Agent → Batch analyze top posts
+4. Orchestrator → Compile comprehensive report
+```
+
+**Focused Investigation** (Known area):
+```
+1. Curator Agent → Deep dive specific subreddits
+2. Synthesizer Agent → Detailed comment analysis
+3. Orchestrator → Generate focused insight report
+```
+
+**Comparative Analysis** (Multiple perspectives):
+```
+1. Discovery Agent → Map ecosystem of related communities
+2. Curator Agent → Parallel content collection
+3. Synthesizer Agent → Compare/contrast insights
+4. Orchestrator → Generate comparative analysis
+```
+
+#### Benefits of Subagent Approach:
+- **Context Efficiency**: Each agent has its own context window
+- **Specialized Expertise**: Purpose-built for specific research tasks
+- **Automated Source Attribution**: Built-in Reddit Analysis Protocol compliance
+- **Scalable Workflows**: Handle large research projects without token limits
+- **Quality Assurance**: Consistent research methodology and output formatting
+
+#### Usage Recommendations:
+- **Always start with reddit-research-orchestrator** for complex research
+- **Use individual agents** for specific sub-tasks when needed
+- **Leverage existing Analysis Protocol** for source attribution standards
+- **Combine with manual scripts** for specialized data collection needs
+
+### Legacy Sub-Agent Batching for Large-Scale Analysis
+
+For advanced users preferring manual control, the traditional batching approach remains available:
 
 ```bash
 # 1. Discover relevant subreddits
@@ -392,27 +469,10 @@ python list_top_posts.py SUBREDDIT --time week --limit 100 --format json
 echo 'POST_ID1 POST_ID2 POST_ID3...' | tr ' ' '\n' | split -l 10 - post_batch_
 
 # 4. Use Task tool with summarizing prompts for each batch
-# Task tool prompt example:
-# "Analyze Reddit posts from r/SUBREDDIT. Read post IDs from post_batch_aa, 
-# use fetch_comments.py to get detailed content, then provide a 2-3 paragraph 
-# summary focusing on: common themes, popular genres, reading situations, 
-# notable book recommendations, and engagement patterns."
-
 # 5. Compile final analysis from batch summaries
 ```
 
-**Benefits:**
-- Manages context size effectively for large datasets
-- Enables parallel processing of post batches
-- Provides focused analysis on specific subsets
-- Allows for comprehensive final synthesis
-
-**Use Cases:**
-- Discovering communities around emerging topics
-- Analyzing 50+ posts from active subreddits
-- Conducting deep content analysis requiring detailed comment examination
-- Research projects needing systematic approach to large communities
-- Comparative analysis across multiple time periods or subreddits
+**Note**: The specialized Reddit subagents provide a more streamlined and reliable approach for most research use cases.
 
 ## Notes for Development
 

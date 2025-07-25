@@ -1,9 +1,10 @@
 # Environment variables (contains API credentials)
 .env
 
-# Claude AI local user data (but allow project settings)
+# Claude AI local user data (but allow project settings and agents)
 .claude/
 !.claude/settings.json
+!.claude/agents/
 
 # Python cache
 __pycache__/
