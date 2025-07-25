@@ -50,9 +50,21 @@ python list_top_posts.py SUBREDDIT --filter-title "PATTERN" --time PERIOD --limi
 **MEDIUM PRIORITY** (Score 50-100, Comments 20-50):
 - [Post Title](permalink) - Score: X, Comments: Y - ID: ghi789
 
-## Recommended Batch for Deep Analysis:
+## Recommended Analysis Commands:
+
+**Quick Overview** (top-level comments only):
 ```bash
-python fetch_comments.py abc123 def456 ghi789 --format json
+python fetch_comments.py abc123 def456 ghi789 --top-level-only --format json
+```
+
+**Focused Analysis** (2 levels deep, manageable volume):
+```bash
+python fetch_comments.py abc123 def456 ghi789 --max-depth 2 --max-comments 20 --format json
+```
+
+**Deep Dive** (full comment trees for critical posts):
+```bash
+python fetch_comments.py CRITICAL_POST_ID --format json
 ```
 
 ## Filter Performance:

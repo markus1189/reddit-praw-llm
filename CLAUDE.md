@@ -8,7 +8,7 @@ This toolkit contains three complementary Python scripts for Reddit data extract
 
 1. **`search_subreddits.py`** - Discovers and searches subreddits by topic, popularity, or recommendations
 2. **`list_top_posts.py`** - Discovers and filters top posts from subreddits with advanced pagination
-3. **`fetch_comments.py`** - Extracts detailed post content and top-level comments from specific Reddit posts
+3. **`fetch_comments.py`** - Extracts detailed post content and complete comment trees (including nested replies) from specific Reddit posts
 
 **Key Capabilities:**
 - Discover subreddits by topic, popularity, or get personalized recommendations
@@ -18,6 +18,8 @@ This toolkit contains three complementary Python scripts for Reddit data extract
 - Multiple output formats (streaming, text, JSON)
 - Memory-efficient processing for large datasets
 - Post content extraction including text posts and metadata
+- Complete comment tree extraction with configurable depth and limits
+- Nested reply analysis for deep discussion insights
 
 ## Environment Setup
 
@@ -152,7 +154,7 @@ python list_top_posts.py SUBREDDIT --format {stream|text|json}
 
 **Basic Patterns:**
 ```bash
-# Single post: human-readable output
+# Single post: human-readable output with full comment trees
 python fetch_comments.py POST_ID
 
 # Multiple posts: compare discussions
@@ -162,9 +164,33 @@ python fetch_comments.py POST_ID1 POST_ID2 POST_ID3
 python fetch_comments.py POST_ID --format json
 python fetch_comments.py POST_ID1 POST_ID2 --format json
 
+# Control comment depth and volume
+python fetch_comments.py POST_ID --max-depth 2 --max-comments 10
+
+# Backward compatibility: top-level comments only
+python fetch_comments.py POST_ID --top-level-only
+
 # Combine with list_top_posts.py
 python list_top_posts.py SUBREDDIT | grep "\[.*\]" | # extract post IDs
 python fetch_comments.py ID1 ID2 ID3  # analyze multiple posts
+```
+
+**Advanced Comment Fetching:**
+```bash
+# Deep discussion analysis (unlimited depth)
+python fetch_comments.py POST_ID --format json
+
+# Controlled depth for large threads
+python fetch_comments.py POST_ID --max-depth 3 --max-comments 20
+
+# Focus on top-level discussions only
+python fetch_comments.py POST_ID --top-level-only
+
+# Batch analysis with depth control
+python fetch_comments.py ID1 ID2 ID3 --max-depth 2 --format json
+
+# Large thread management (avoid API limits)
+python fetch_comments.py VIRAL_POST_ID --max-depth 1 --max-comments 50
 ```
 
 ## Performance & Limitations
@@ -174,9 +200,12 @@ python fetch_comments.py ID1 ID2 ID3  # analyze multiple posts
 - **Rate limiting:** 60 requests/minute (auto-handled by PRAW)  
 - **Pagination delays:** 2-second delays between 100-post batches
 - **Large dataset timing:** 1000 posts ≈ 20 minutes
+- **Comment tree depth:** Unlimited by default, but deep threads may hit API limits
+- **"More comments" expansion:** Automatically handled but may increase fetch time
 
 ### Memory Usage
 - `list_top_posts.py` uses generators (memory-efficient)
+- `fetch_comments.py` builds comment trees in memory (use limits for large threads)
 - Regex filtering happens during iteration (not post-processing)
 - Safe to interrupt with Ctrl+C (preserves partial results)
 
@@ -184,6 +213,8 @@ python fetch_comments.py ID1 ID2 ID3  # analyze multiple posts
 - For analysis of 1000+ posts, consider breaking into smaller time periods
 - Use streaming format for real-time feedback on large datasets
 - JSON format is best for programmatic analysis
+- For viral posts with 1000+ comments, use `--max-depth` and `--max-comments` limits
+- Deep comment trees (depth > 5) may significantly increase processing time
 
 ## Troubleshooting Guidance
 
@@ -339,7 +370,8 @@ python list_top_posts.py MachineLearning --filter-title "(tool|library|framework
 **"I want to analyze discussions about X"**
 1. Use `list_top_posts.py` with title filter to find relevant posts
 2. Review results and identify interesting post IDs
-3. Use `fetch_comments.py` to get detailed content for specific posts
+3. Use `fetch_comments.py` to get detailed content including nested discussions
+4. For large threads, use `--max-depth 2 --max-comments 20` to focus on quality content
 
 **"I need data for research"**
 1. Use JSON output format for structured data
@@ -369,8 +401,8 @@ python list_top_posts.py datascience --time month --format json > posts.json
 # 2. Filter and extract IDs
 jq '.posts[] | select(.score > 100) | .id' posts.json > high_score_ids.txt
 
-# 3. Detailed analysis
-cat high_score_ids.txt | xargs -I {} python fetch_comments.py {} --format json
+# 3. Detailed analysis with comment tree control
+cat high_score_ids.txt | xargs -I {} python fetch_comments.py {} --max-depth 2 --format json
 ```
 
 ### Batch Processing
